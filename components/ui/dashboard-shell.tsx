@@ -18,6 +18,7 @@ import {
   LogOut,
   Menu,
   Gift,
+  Puzzle,
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useMobile } from "@/hooks/use-mobile"
@@ -101,6 +102,11 @@ export function DashboardShell({ children, restaurantId = "1" }: DashboardShellP
       href: `/dashboard/${restaurantId}/promotions`,
       title: "Promotions",
       icon: <Gift className="h-5 w-5" />,
+    },
+    {
+      href: `/dashboard/${restaurantId}/extensions`,
+      title: "Extensions",
+      icon: <Puzzle className="h-5 w-5" />,
     },
     {
       href: `/dashboard/${restaurantId}/analytics`,

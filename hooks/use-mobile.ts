@@ -2,23 +2,25 @@
 
 import { useState, useEffect } from "react"
 
-export const useMobile = () => {
+export function useMobile(breakpoint = 768): boolean {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768) // Adjust breakpoint as needed
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < breakpoint)
     }
 
-    // Set initial value
-    handleResize()
+    // Vérifier au chargement initial
+    checkIsMobile()
 
-    // Add event listener
-    window.addEventListener("resize", handleResize)
+    // Ajouter un écouteur d'événement pour les changements de taille
+    window.addEventListener("resize", checkIsMobile)
 
-    // Remove event listener on cleanup
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    // Nettoyer l'écouteur d'événement
+    return () => {
+      window.removeEventListener("resize", checkIsMobile)
+    }
+  }, [breakpoint])
 
   return isMobile
 }

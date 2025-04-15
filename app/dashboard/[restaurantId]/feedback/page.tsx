@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { DashboardShell } from "@/components/ui/dashboard-shell"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -15,6 +14,7 @@ import { BarChart, LineChart, PieChart } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as RechartsBarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { DashboardShell } from "@/components/ui/dashboard-shell"
 
 // Types pour les avis
 interface Review {
@@ -293,6 +293,22 @@ export default function FeedbackPage({ params }: { params: { restaurantId: strin
   const [sourceFilter, setSourceFilter] = useState("all")
   const [ratingFilter, setRatingFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    // Set initial value
+    handleResize()
+
+    // Add event listener
+    window.addEventListener("resize", handleResize)
+
+    // Remove event listener on cleanup
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -400,6 +416,50 @@ export default function FeedbackPage({ params }: { params: { restaurantId: strin
     const sum = reviews.reduce((acc, review) => acc + review.rating, 0)
     return (sum / reviews.length).toFixed(1)
   }
+
+  // Sidebar items
+  const sidebarItems = [
+    {
+      href: `/dashboard/${restaurantId}`,
+      title: "Tableau de bord",
+    },
+    {
+      href: `/dashboard/${restaurantId}/tables`,
+      title: "Tables",
+    },
+    {
+      href: `/dashboard/${restaurantId}/orders`,
+      title: "Commandes",
+    },
+    {
+      href: `/dashboard/${restaurantId}/menu`,
+      title: "Menu",
+    },
+    {
+      href: `/dashboard/${restaurantId}/inventory`,
+      title: "Inventaire",
+    },
+    {
+      href: `/dashboard/${restaurantId}/staff`,
+      title: "Personnel",
+    },
+    {
+      href: `/dashboard/${restaurantId}/reservations`,
+      title: "Réservations",
+    },
+    {
+      href: `/dashboard/${restaurantId}/customers`,
+      title: "Clients",
+    },
+    {
+      href: `/dashboard/${restaurantId}/analytics`,
+      title: "Analyses",
+    },
+    {
+      href: `/dashboard/${restaurantId}/settings`,
+      title: "Paramètres",
+    },
+  ]
 
   if (loading) {
     return (
@@ -729,8 +789,8 @@ export default function FeedbackPage({ params }: { params: { restaurantId: strin
                     <Bar dataKey="score" fill="var(--color-score)" radius={[0, 4, 4, 0]} />
                   </RechartsBarChart>
                 </ResponsiveContainer>
-              </CardContent>
-            </Card>
+              </ChartContainer>
+            </CardContent>
           </Card>
 
           <div className="grid gap-4 md:grid-cols-3">
