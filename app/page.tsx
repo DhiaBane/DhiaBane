@@ -1,222 +1,138 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-
-// Définition des types pour les fonctionnalités
-type FeatureStatus = "implemented" | "in-progress" | "not-implemented"
-
-interface Feature {
-  name: string
-  status: FeatureStatus
-  route?: string
-}
-
-// Liste des fonctionnalités
-const features: Feature[] = [
-  { name: "Tableau de bord", status: "implemented", route: "/dashboard/1" },
-  { name: "Tables", status: "implemented", route: "/dashboard/1/tables" },
-  { name: "Menu", status: "implemented", route: "/dashboard/1/menu" },
-  { name: "Inventaire", status: "implemented", route: "/dashboard/1/inventory" },
-  { name: "Réservations", status: "implemented", route: "/dashboard/1/reservations" },
-  { name: "Clients", status: "implemented", route: "/dashboard/1/customers" },
-  { name: "Fidélité", status: "implemented", route: "/dashboard/1/loyalty" },
-  { name: "Paiements", status: "implemented", route: "/dashboard/1/payments" },
-  { name: "Factures", status: "implemented", route: "/dashboard/1/invoices" },
-  { name: "Analytiques", status: "implemented", route: "/dashboard/1/analytics" },
-  { name: "Rapports", status: "implemented", route: "/dashboard/1/reports" },
-  { name: "Fournisseurs", status: "implemented", route: "/dashboard/1/suppliers" },
-  { name: "Formation", status: "implemented", route: "/dashboard/1/training" },
-  { name: "Scripts", status: "implemented", route: "/dashboard/1/settings/scripts" },
-  { name: "Feedback", status: "implemented", route: "/dashboard/1/feedback" },
-  { name: "Menu Digital", status: "implemented", route: "/dashboard/1/digital-menu" },
-  { name: "Commandes en ligne", status: "implemented", route: "/dashboard/1/online-orders" },
-  { name: "Livraison", status: "implemented", route: "/dashboard/1/delivery" },
-  { name: "Événements", status: "implemented", route: "/dashboard/1/events" },
-  { name: "Personnel", status: "implemented", route: "/dashboard/1/staff" },
-  { name: "IA Insights", status: "implemented", route: "/dashboard/1/ai-insights" },
-  { name: "Qualité", status: "implemented", route: "/dashboard/1/quality" },
-  { name: "Marketing", status: "implemented", route: "/dashboard/1/marketing" },
-  { name: "Paie", status: "implemented", route: "/dashboard/1/payroll" },
-  { name: "Gestion de chaîne", status: "implemented", route: "/dashboard/chain" },
-  { name: "Planification", status: "implemented", route: "/dashboard/1/scheduling" },
-  { name: "Comptabilité", status: "implemented", route: "/dashboard/1/accounting" },
-  { name: "CRM Avancé", status: "implemented", route: "/dashboard/1/crm" },
-  { name: "Photos", status: "implemented", route: "/dashboard/1/photos" },
-  { name: "Gestion des allergènes", status: "implemented", route: "/dashboard/1/allergens" },
-  { name: "Intégration POS", status: "implemented", route: "/dashboard/1/pos" },
-  { name: "Gestion des recettes", status: "implemented", route: "/dashboard/1/recipes" },
-  { name: "Contrôle des coûts", status: "implemented", route: "/dashboard/1/cost-control" },
-  { name: "Maintenance", status: "implemented", route: "/dashboard/1/maintenance" },
-  { name: "Gestion des déchets", status: "implemented", route: "/dashboard/1/waste-management" },
-  { name: "Conformité", status: "implemented", route: "/dashboard/1/compliance" },
-  { name: "Intégrations", status: "implemented", route: "/dashboard/1/integrations" },
-  // Nouvelles fonctionnalités avancées
-  { name: "Mode hors-ligne robuste", status: "implemented", route: "/dashboard/1/offline" },
-  { name: "IA avancée", status: "implemented", route: "/dashboard/1/ai-advanced" },
-  { name: "Expérience client augmentée", status: "implemented", route: "/dashboard/1/customer-experience" },
-  { name: "Tableau multi-établissements", status: "implemented", route: "/dashboard/multi-locations" },
-  { name: "Outils de durabilité", status: "implemented", route: "/dashboard/1/sustainability" },
-  { name: "Marketplace d'extensions", status: "not-implemented" },
-  { name: "Gestion avancée des fournisseurs", status: "not-implemented" },
-  { name: "Formation interactive", status: "not-implemented" },
-  { name: "Analyse prédictive financière", status: "not-implemented" },
-  { name: "Conformité réglementaire auto", status: "not-implemented" },
-]
+import { ArrowRight, Building2, Store, Users, Trash2, Wrench } from "lucide-react"
 
 export default function HomePage() {
-  // Filtrer les fonctionnalités par statut
-  const implementedFeatures = features.filter((feature) => feature.status === "implemented")
-  const inProgressFeatures = features.filter((feature) => feature.status === "in-progress")
-  const notImplementedFeatures = features.filter((feature) => feature.status === "not-implemented")
-
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <div className="mr-4 flex">
-            <Link href="/" className="mr-6 flex items-center space-x-2">
-              <span className="font-bold text-xl">RestauPilot</span>
-            </Link>
-          </div>
-          <div className="flex flex-1 items-center justify-end space-x-2">
-            <nav className="flex items-center space-x-2">
-              <Link href="/login">
-                <Button variant="outline">Connexion</Button>
-              </Link>
-              <Link href="/register">
-                <Button>S'inscrire</Button>
-              </Link>
-            </nav>
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <header className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+        <div className="container mx-auto px-4 py-16 md:py-24">
+          <div className="max-w-3xl">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">RestauPilot</h1>
+            <p className="text-xl md:text-2xl mb-8">La plateforme complète de gestion pour vos restaurants</p>
+            <div className="flex flex-wrap gap-4">
+              <Button asChild size="lg" className="bg-white text-blue-700 hover:bg-gray-100">
+                <Link href="/login">Se connecter</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="bg-transparent text-white border-white hover:bg-white/10"
+              >
+                <Link href="/register">Créer un compte</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
-      <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
-                  RestauPilot - Plateforme de gestion de restaurants
-                </h1>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                  Une solution complète pour gérer tous les aspects de votre restaurant ou chaîne de restaurants.
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/demo">
-                  <Button size="lg">Essayer la démo</Button>
-                </Link>
-                <Link href="/pricing">
-                  <Button variant="outline" size="lg">
-                    Voir les tarifs
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Fonctionnalités implémentées
-                </h2>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                  Découvrez toutes les fonctionnalités disponibles dans RestauPilot
-                </p>
+      {/* Features Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Fonctionnalités principales</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <Building2 className="h-6 w-6 text-blue-600" />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-5xl">
-                {implementedFeatures.map((feature) => (
-                  <Link
-                    key={feature.name}
-                    href={feature.route || "#"}
-                    className={`${!feature.route ? "pointer-events-none" : ""}`}
-                  >
-                    <Card className="h-full bg-green-500 hover:bg-green-600 transition-colors text-white">
-                      <CardContent className="flex items-center justify-center p-6">
-                        <p className="text-center font-medium">{feature.name}</p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
+              <h3 className="text-xl font-semibold mb-2">Gestion d'entreprise</h3>
+              <p className="text-gray-600">
+                Gérez plusieurs entreprises et restaurants depuis une interface centralisée.
+              </p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <Store className="h-6 w-6 text-blue-600" />
               </div>
+              <h3 className="text-xl font-semibold mb-2">Gestion de restaurants</h3>
+              <p className="text-gray-600">Contrôlez vos menus, tables, commandes et réservations en temps réel.</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Gestion du personnel</h3>
+              <p className="text-gray-600">Gérez votre équipe, les horaires et les performances de manière efficace.</p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Fonctionnalités en développement
-                </h2>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                  Ces fonctionnalités seront bientôt disponibles
-                </p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-5xl">
-                {inProgressFeatures.map((feature) => (
-                  <Card key={feature.name} className="h-full bg-yellow-500 text-white">
-                    <CardContent className="flex items-center justify-center p-6">
-                      <p className="text-center font-medium">{feature.name}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+      {/* Dev Section */}
+      <section className="py-8 bg-gray-100 border-t border-b border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center">
+              <Wrench className="h-5 w-5 mr-2" />
+              Section Développement
+            </h2>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Link
+                href="/restaurants/delete-test"
+                className="flex items-center p-3 border rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <Trash2 className="h-5 w-5 mr-2 text-red-500" />
+                <span>Tester Suppression Restaurant</span>
+              </Link>
+              <Link
+                href="/test-supabase-direct"
+                className="flex items-center p-3 border rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <Trash2 className="h-5 w-5 mr-2 text-orange-500" />
+                <span>Test Direct Supabase</span>
+              </Link>
+              <Link
+                href="/dashboard"
+                className="flex items-center p-3 border rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <Store className="h-5 w-5 mr-2 text-blue-500" />
+                <span>Accéder au tableau de bord</span>
+              </Link>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Fonctionnalités planifiées
-                </h2>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                  Ces fonctionnalités sont prévues pour les prochaines versions
-                </p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-5xl">
-                {notImplementedFeatures.map((feature) => (
-                  <Card key={feature.name} className="h-full bg-red-500 text-white">
-                    <CardContent className="flex items-center justify-center p-6">
-                      <p className="text-center font-medium">{feature.name}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+      {/* CTA Section */}
+      <section className="py-16 bg-blue-700 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4">Prêt à optimiser la gestion de vos restaurants ?</h2>
+          <p className="text-xl mb-8 max-w-2xl mx-auto">
+            Rejoignez des milliers de restaurateurs qui font confiance à RestauPilot pour leur gestion quotidienne.
+          </p>
+          <Button asChild size="lg" className="bg-white text-blue-700 hover:bg-gray-100">
+            <Link href="/register">
+              Commencer maintenant
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 bg-gray-800 text-gray-300 mt-auto">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-4 md:mb-0">
+              <h2 className="text-xl font-bold text-white">RestauPilot</h2>
+              <p className="text-sm">© 2025 RestauPilot. Tous droits réservés.</p>
+            </div>
+            <div className="flex gap-4">
+              <Link href="/login" className="hover:text-white">
+                Se connecter
+              </Link>
+              <Link href="/register" className="hover:text-white">
+                S'inscrire
+              </Link>
+              <Link href="/dashboard" className="hover:text-white">
+                Tableau de bord
+              </Link>
             </div>
           </div>
-        </section>
-      </main>
-      <footer className="w-full border-t py-6 md:py-0">
-        <div className="container flex flex-col md:flex-row items-center justify-between gap-4 md:h-24">
-          <p className="text-sm text-gray-500">© 2025 RestauPilot. Tous droits réservés.</p>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/about" className="text-gray-500 hover:underline underline-offset-4">
-              À propos
-            </Link>
-            <Link href="/features" className="text-gray-500 hover:underline underline-offset-4">
-              Fonctionnalités
-            </Link>
-            <Link href="/pricing" className="text-gray-500 hover:underline underline-offset-4">
-              Tarifs
-            </Link>
-            <Link href="/contact" className="text-gray-500 hover:underline underline-offset-4">
-              Contact
-            </Link>
-            <Link href="/privacy" className="text-gray-500 hover:underline underline-offset-4">
-              Confidentialité
-            </Link>
-            <Link href="/terms" className="text-gray-500 hover:underline underline-offset-4">
-              Conditions
-            </Link>
-          </nav>
         </div>
       </footer>
     </div>
