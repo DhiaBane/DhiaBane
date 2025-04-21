@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,66 +13,74 @@ import {
 import { HelpCircle } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-// Import voice commands utility conditionally to prevent server-side errors
-let getSofiaVoiceCommands: any = () => []
-
-// Dynamically import browser-specific modules
-if (typeof window !== "undefined") {
-  import("@/utils/voice-commands")
-    .then((module) => {
-      getSofiaVoiceCommands = module.getSofiaVoiceCommands
-    })
-    .catch((err) => console.error("Failed to load voice commands utilities:", err))
-}
-
 export function VoiceCommandsHelp() {
   const [open, setOpen] = useState(false)
-  const [isBrowser, setIsBrowser] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [commands, setCommands] = useState<any[]>([])
 
   // Check if we're in the browser
-  useState(() => {
-    setIsBrowser(true)
-  })
+  useEffect(() => {
+    setMounted(true)
 
-  // Obtenir les commandes vocales de base (sans les actions réelles)
-  const baseCommands = isBrowser
-    ? getSofiaVoiceCommands({
-        stopListening: () => {},
-        repeatLastMessage: () => {},
-        clearMessages: () => {},
-        pauseResumeAudio: () => {},
-        stopAudio: () => {},
-      })
-    : []
+    // Only try to load commands on the client side
+    if (typeof window !== "undefined") {
+      // Import voice commands utility
+      import("@/utils/voice-commands")
+        .then((module) => {
+          // Get basic commands without real actions
+          const baseCommands = module.getSofiaVoiceCommands({
+            stopListening: () => {},
+            repeatLastMessage: () => {},
+            clearMessages: () => {},
+            pauseResumeAudio: () => {},
+            stopAudio: () => {},
+          })
 
-  // Ajouter les commandes spécifiques au domaine de la restauration
-  const restaurantCommands = [
-    {
-      name: "what-is-today-menu",
-      patterns: ["quel est le menu du jour", "menu du jour", "dis moi le menu du jour"],
-      description: "Affiche le menu du jour",
-    },
-    {
-      name: "order-stock",
-      patterns: ["commander du stock", "réapprovisionner les stocks", "commander les produits"],
-      description: "Lance une commande de réapprovisionnement",
-    },
-    {
-      name: "performance-analysis",
-      patterns: ["analyse des performances", "résumé des ventes", "donne moi les statistiques"],
-      description: "Affiche un résumé des performances",
-    },
-  ]
+          // Add restaurant-specific commands
+          const restaurantCommands = [
+            {
+              name: "daily-report",
+              patterns: ["rapport journalier", "rapport du jour", "bilan journalier"],
+              description: "Affiche le rapport journalier",
+            },
+            {
+              name: "profit-analysis",
+              patterns: ["analyse des marges", "plats les moins rentables", "marges faibles"],
+              description: "Analyse les marges des plats",
+            },
+            {
+              name: "anomaly-detection",
+              patterns: ["détection d'anomalies", "problèmes détectés", "baisse de performance"],
+              description: "Recherche des anomalies",
+            },
+          ]
 
-  // Transformer les commandes pour l'affichage
-  const displayCommands = [
-    ...baseCommands.map((cmd) => ({
-      name: cmd.name,
-      patterns: cmd.patterns,
-      description: cmd.feedback || "Commande système",
-    })),
-    ...restaurantCommands,
-  ]
+          // Transform commands for display
+          const displayCommands = [
+            ...baseCommands.map((cmd) => ({
+              name: cmd.name,
+              patterns: cmd.patterns,
+              description: cmd.feedback || "Commande système",
+            })),
+            ...restaurantCommands,
+          ]
+
+          setCommands(displayCommands)
+        })
+        .catch((err) => {
+          console.error("Failed to load voice commands utilities:", err)
+          setCommands([])
+        })
+    }
+  }, [])
+
+  if (!mounted) {
+    return (
+      <Button variant="ghost" size="icon" disabled>
+        <HelpCircle className="h-4 w-4" />
+      </Button>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -98,8 +106,8 @@ export function VoiceCommandsHelp() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {displayCommands.map((command) => (
-              <TableRow key={command.name}>
+            {commands.map((command, index) => (
+              <TableRow key={index}>
                 <TableCell className="font-medium">{command.name}</TableCell>
                 <TableCell>{command.patterns.join(", ")}</TableCell>
                 <TableCell>{command.description}</TableCell>
