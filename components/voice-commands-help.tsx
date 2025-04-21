@@ -12,19 +12,38 @@ import {
 } from "@/components/ui/dialog"
 import { HelpCircle } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { getSofiaVoiceCommands } from "@/utils/voice-commands"
+
+// Import voice commands utility conditionally to prevent server-side errors
+let getSofiaVoiceCommands: any = () => []
+
+// Dynamically import browser-specific modules
+if (typeof window !== "undefined") {
+  import("@/utils/voice-commands")
+    .then((module) => {
+      getSofiaVoiceCommands = module.getSofiaVoiceCommands
+    })
+    .catch((err) => console.error("Failed to load voice commands utilities:", err))
+}
 
 export function VoiceCommandsHelp() {
   const [open, setOpen] = useState(false)
+  const [isBrowser, setIsBrowser] = useState(false)
+
+  // Check if we're in the browser
+  useState(() => {
+    setIsBrowser(true)
+  })
 
   // Obtenir les commandes vocales de base (sans les actions réelles)
-  const baseCommands = getSofiaVoiceCommands({
-    stopListening: () => {},
-    repeatLastMessage: () => {},
-    clearMessages: () => {},
-    pauseResumeAudio: () => {},
-    stopAudio: () => {},
-  })
+  const baseCommands = isBrowser
+    ? getSofiaVoiceCommands({
+        stopListening: () => {},
+        repeatLastMessage: () => {},
+        clearMessages: () => {},
+        pauseResumeAudio: () => {},
+        stopAudio: () => {},
+      })
+    : []
 
   // Ajouter les commandes spécifiques au domaine de la restauration
   const restaurantCommands = [

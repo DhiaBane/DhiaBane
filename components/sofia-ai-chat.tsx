@@ -11,24 +11,79 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Loader2, AlertCircle, Mic, MicOff, Send, Volume2, Repeat, Pause, Play, Trash2 } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useSpeechRecognition } from "@/hooks/use-speech-recognition"
-import { useSpeechSynthesis } from "@/hooks/use-speech-synthesis"
-import { cleanTextForSpeech } from "@/utils/clean-text-for-speech"
-import {
-  detectVoiceCommand,
-  getSofiaVoiceCommands,
-  cleanTextFromCommands,
-  type VoiceCommand,
-} from "@/utils/voice-commands"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { VoiceCommandsHelp } from "@/components/voice-commands-help"
 
+// Import hooks conditionally to prevent server-side errors
+let useSpeechRecognition: any = () => ({
+  isListening: false,
+  transcript: "",
+  startListening: () => {},
+  stopListening: () => {},
+  resetTranscript: () => {},
+  browserSupportsSpeechRecognition: false,
+  error: null,
+})
+
+let useSpeechSynthesis: any = () => ({
+  speak: () => {},
+  stop: () => {},
+  pause: () => {},
+  resume: () => {},
+  isSpeaking: false,
+  isPaused: false,
+  browserSupportsSpeechSynthesis: false,
+  error: null,
+})
+
+let cleanTextForSpeech: any = (text: string) => text
+let detectVoiceCommand: any = () => null
+let getSofiaVoiceCommands: any = () => []
+let cleanTextFromCommands: any = (text: string) => text
+
+// Dynamically import browser-specific modules
+if (typeof window !== "undefined") {
+  // Only import these on the client side
+  import("@/hooks/use-speech-recognition")
+    .then((module) => {
+      useSpeechRecognition = module.useSpeechRecognition
+    })
+    .catch((err) => console.error("Failed to load speech recognition:", err))
+
+  import("@/hooks/use-speech-synthesis")
+    .then((module) => {
+      useSpeechSynthesis = module.useSpeechSynthesis
+    })
+    .catch((err) => console.error("Failed to load speech synthesis:", err))
+
+  import("@/utils/clean-text-for-speech")
+    .then((module) => {
+      cleanTextForSpeech = module.cleanTextForSpeech
+    })
+    .catch((err) => console.error("Failed to load text cleaning utility:", err))
+
+  import("@/utils/voice-commands")
+    .then((module) => {
+      detectVoiceCommand = module.detectVoiceCommand
+      getSofiaVoiceCommands = module.getSofiaVoiceCommands
+      cleanTextFromCommands = module.cleanTextFromCommands
+    })
+    .catch((err) => console.error("Failed to load voice commands utilities:", err))
+}
+
 interface Message {
   role: "user" | "assistant"
   content: string
+}
+
+interface VoiceCommand {
+  name: string
+  patterns: string[]
+  action: () => void
+  feedback?: string
 }
 
 export default function SofiaAIChat() {
@@ -50,8 +105,39 @@ export default function SofiaAIChat() {
   const lastAssistantMessageRef = useRef<string>("")
   const commandTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [customCommands, setCustomCommands] = useState<VoiceCommand[]>([])
+  const [isBrowser, setIsBrowser] = useState(false)
 
-  // Hook de reconnaissance vocale
+  // Check if we're in the browser
+  useEffect(() => {
+    setIsBrowser(true)
+  }, [])
+
+  // Only use speech hooks in the browser
+  const speechRecognition = isBrowser
+    ? useSpeechRecognition()
+    : {
+        isListening: false,
+        transcript: "",
+        startListening: () => {},
+        stopListening: () => {},
+        resetTranscript: () => {},
+        browserSupportsSpeechRecognition: false,
+        error: null,
+      }
+
+  const speechSynthesis = isBrowser
+    ? useSpeechSynthesis()
+    : {
+        speak: () => {},
+        stop: () => {},
+        pause: () => {},
+        resume: () => {},
+        isSpeaking: false,
+        isPaused: false,
+        browserSupportsSpeechSynthesis: false,
+        error: null,
+      }
+
   const {
     isListening,
     transcript,
@@ -60,9 +146,8 @@ export default function SofiaAIChat() {
     resetTranscript,
     browserSupportsSpeechRecognition,
     error: speechRecognitionError,
-  } = useSpeechRecognition()
+  } = speechRecognition
 
-  // Hook de synthèse vocale
   const {
     speak,
     stop: stopSpeaking,
@@ -72,7 +157,7 @@ export default function SofiaAIChat() {
     isPaused,
     browserSupportsSpeechSynthesis,
     error: speechSynthesisError,
-  } = useSpeechSynthesis()
+  } = speechSynthesis
 
   // Fonctions pour les commandes vocales
   const clearMessages = () => {
@@ -103,7 +188,7 @@ export default function SofiaAIChat() {
   }
 
   // Fonction pour soumettre le formulaire
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim()) return
 
@@ -150,13 +235,15 @@ export default function SofiaAIChat() {
 
   // Ajout de commandes vocales spécifiques au domaine de la restauration
   const addRestaurantCommands = useCallback(() => {
+    if (!isBrowser) return
+
     const newRestaurantCommands: VoiceCommand[] = [
       {
         name: "daily-report",
         patterns: ["rapport journalier", "rapport du jour", "bilan journalier"],
         action: () => {
           setInput("Peux-tu me faire un rapport journalier de notre activité ?")
-          handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          handleFormSubmit(new Event("submit") as unknown as React.FormEvent)
         },
         feedback: "Je vais générer un rapport journalier.",
       },
@@ -165,7 +252,7 @@ export default function SofiaAIChat() {
         patterns: ["analyse des marges", "plats les moins rentables", "marges faibles"],
         action: () => {
           setInput("Quels plats ont généré le moins de marge cette semaine ?")
-          handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          handleFormSubmit(new Event("submit") as unknown as React.FormEvent)
         },
         feedback: "Je vais analyser les marges des plats.",
       },
@@ -174,27 +261,31 @@ export default function SofiaAIChat() {
         patterns: ["détection d'anomalies", "problèmes détectés", "baisse de performance"],
         action: () => {
           setInput("As-tu détecté une baisse de performance ou une anomalie récemment ?")
-          handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          handleFormSubmit(new Event("submit") as unknown as React.FormEvent)
         },
         feedback: "Je vais rechercher des anomalies.",
       },
     ]
     setCustomCommands(newRestaurantCommands)
-  }, [])
+  }, [isBrowser])
 
   // Définir les commandes vocales
-  const voiceCommands = getSofiaVoiceCommands({
-    stopListening,
-    repeatLastMessage,
-    clearMessages,
-    pauseResumeAudio,
-    stopAudio: stopSpeaking,
-  }).concat(customCommands)
+  const voiceCommands = isBrowser
+    ? getSofiaVoiceCommands({
+        stopListening,
+        repeatLastMessage,
+        clearMessages,
+        pauseResumeAudio,
+        stopAudio: stopSpeaking,
+      }).concat(customCommands)
+    : []
 
   // Initialisation des commandes spécifiques à la restauration
   useEffect(() => {
-    addRestaurantCommands()
-  }, [addRestaurantCommands])
+    if (isBrowser) {
+      addRestaurantCommands()
+    }
+  }, [isBrowser, addRestaurantCommands])
 
   // Défilement automatique vers le bas lorsque les messages changent
   useEffect(() => {
@@ -203,6 +294,8 @@ export default function SofiaAIChat() {
 
   // Traiter les commandes vocales lorsque la transcription change
   useEffect(() => {
+    if (!isBrowser) return
+
     if (transcript && isListening) {
       const command = detectVoiceCommand(transcript, voiceCommands)
 
@@ -232,10 +325,12 @@ export default function SofiaAIChat() {
       // Si ce n'est pas une commande, mettre à jour l'input
       setInput(transcript)
     }
-  }, [transcript, isListening, voiceCommands, resetTranscript])
+  }, [transcript, isListening, voiceCommands, resetTranscript, isBrowser])
 
   // Envoyer automatiquement le message après la transcription si autoSend est activé
   useEffect(() => {
+    if (!isBrowser) return
+
     if (!isListening && transcript && autoSend) {
       // Vérifier si le transcript contient une commande
       const command = detectVoiceCommand(transcript, voiceCommands)
@@ -257,10 +352,12 @@ export default function SofiaAIChat() {
 
       return () => clearTimeout(timer)
     }
-  }, [isListening, transcript, autoSend, voiceCommands])
+  }, [isListening, transcript, autoSend, voiceCommands, isBrowser])
 
   // Lire automatiquement la réponse de l'IA si autoSpeak est activé
   useEffect(() => {
+    if (!isBrowser) return
+
     const lastMessage = messages[messages.length - 1]
     if (lastMessage && lastMessage.role === "assistant" && autoSpeak && browserSupportsSpeechSynthesis) {
       // Stocker le dernier message de l'assistant pour le bouton "Répéter"
@@ -270,16 +367,18 @@ export default function SofiaAIChat() {
       const cleanedText = cleanTextForSpeech(lastMessage.content)
       speak(cleanedText)
     }
-  }, [messages, autoSpeak, browserSupportsSpeechSynthesis, speak])
+  }, [messages, autoSpeak, browserSupportsSpeechSynthesis, speak, isBrowser])
 
   // Afficher l'erreur de reconnaissance vocale ou de synthèse vocale
   useEffect(() => {
+    if (!isBrowser) return
+
     if (speechRecognitionError) {
       setError(speechRecognitionError)
     } else if (speechSynthesisError) {
       setError(speechSynthesisError)
     }
-  }, [speechRecognitionError, speechSynthesisError])
+  }, [speechRecognitionError, speechSynthesisError, isBrowser])
 
   // Nettoyer les timeouts lors du démontage
   useEffect(() => {
@@ -295,6 +394,8 @@ export default function SofiaAIChat() {
   }
 
   const handleVoiceButtonClick = () => {
+    if (!isBrowser) return
+
     if (isListening) {
       setAutoSend(false)
       stopListening()
@@ -309,6 +410,8 @@ export default function SofiaAIChat() {
   }
 
   const toggleSpeaking = () => {
+    if (!isBrowser) return
+
     if (isSpeaking) {
       if (isPaused) {
         resumeSpeaking()
@@ -319,6 +422,28 @@ export default function SofiaAIChat() {
       // Si aucune synthèse vocale n'est en cours, répéter le dernier message
       repeatLastMessage()
     }
+  }
+
+  // If not in browser, show a loading state
+  if (!isBrowser) {
+    return (
+      <Card className="w-full h-[600px] flex flex-col">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback>S</AvatarFallback>
+            </Avatar>
+            <span>Sofia AI - Assistant Restaurateur</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Chargement de Sofia AI...</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -430,7 +555,7 @@ export default function SofiaAIChat() {
         </ScrollArea>
       </CardContent>
       <CardFooter className="pt-2">
-        <form onSubmit={handleSubmit} className="flex w-full gap-2">
+        <form onSubmit={handleFormSubmit} className="flex w-full gap-2">
           <div className="relative flex-grow">
             <Input
               placeholder={isListening ? "Parlez maintenant... (essayez 'Sofia, aide-moi')" : "Tapez votre message..."}

@@ -1,9 +1,7 @@
-"use client"
-
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft } from "lucide-react"
-import SofiaAIChat from "@/components/sofia-ai-chat"
+import { SofiaAIChatClient } from "./client"
 
 export default function SofiaAIPage() {
   return (
@@ -50,7 +48,7 @@ export default function SofiaAIPage() {
             </ul>
           </div>
 
-          <SofiaAIChat />
+          <SofiaAIChatClient />
         </div>
       </div>
     </div>
