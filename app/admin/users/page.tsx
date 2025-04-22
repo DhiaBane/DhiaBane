@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { UserPlus, Filter } from "lucide-react"
 
 async function UsersTableContent() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   // Fetch users data
   const { data: users, error } = await supabase

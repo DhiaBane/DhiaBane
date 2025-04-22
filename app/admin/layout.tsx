@@ -1,5 +1,4 @@
 import type React from "react"
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { createClient } from "@supabase/supabase-js"
 import AdminSidebar from "@/components/admin/sidebar"
@@ -10,6 +9,8 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Dynamically import cookies
+  const { cookies } = await import("next/headers")
   const cookieStore = cookies()
   const supabaseCookie = cookieStore.get("sb-access-token")?.value
 
